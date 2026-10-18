@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f7f7"><title>Мои слова</title><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="stylesheet" href="style.css"></head>
+<body>
+<header class="toolbar"><h1>Мои слова</h1><button id="mode-button" class="mode-button" type="button">🔒 Для взрослых</button><button id="add" class="add adult-only" type="button">＋ Добавить карточку</button><label class="sorting adult-only">Порядок карточек <select id="sort-mode" aria-label="Порядок карточек"><option value="original">Обычный</option><option value="popular">Часто используемые — сначала (меняет места)</option></select></label><label class="sorting adult-only">Цветовая схема <select id="color-mode" aria-label="Цветовая схема карточек"><option value="semantic">По смыслу слов</option><option value="neutral">Нейтральная</option><option value="custom">Индивидуальные цвета</option></select></label><label class="sorting adult-only">Размер карточек <select id="card-size" aria-label="Размер карточек"><option value="large">Крупные — 2 в ряд</option><option value="medium">Средние — 3 в ряд</option><option value="compact">Компактные — 4 в ряд</option></select></label></header>
+<section class="home-settings adult-only" aria-label="Настройка главного экрана ребёнка">
+<h2>🏠 Главный экран ребёнка</h2>
+<p>Выберите основные карточки для вкладки «Главная». Остальные слова останутся во вкладке «Все» и в категориях. Расположение на главной остаётся постоянным даже при сортировке по частоте. Выбранные слова можно изменить в любой момент.</p>
+<p id="home-count" aria-live="polite"></p>
+<div id="home-card-list" class="home-card-list"></div>
+</section>
+<section class="adult-only" aria-label="Видимость категорий ребёнка"><h2>👁 Категории на детском экране</h2><p>Выберите разделы, которые ребёнок будет видеть. Скрытие не удаляет карточки: взрослый по-прежнему видит все категории и может вернуть их в любой момент. Вкладка «Главная» всегда доступна.</p><div id="category-visibility-list" class="home-card-list"></div></section>
+<section class="adult-only custom-category-settings" aria-label="Свои категории">
+<h2>📁 Свои категории</h2>
+<p>Создавайте разделы для ребёнка, выбирайте эмодзи и назначайте карточки новой категории при редактировании. Карточки сохраняются даже при удалении категории.</p>
+<form id="custom-category-form" class="custom-category-form">
+<label>Эмодзи<input id="custom-category-emoji" type="text" maxlength="12" value="📁" aria-label="Эмодзи категории"></label>
+<label>Название<input id="custom-category-name" type="text" maxlength="35" required placeholder="Например, Семья"></label>
+<button type="submit">＋ Создать категорию</button>
+</form>
+<div id="custom-category-list" class="custom-category-list"></div>
+</section>
+<section class="voice-settings adult-only" aria-label="Настройки автоматического голоса">
+<h2>🔊 Автоматический русский голос</h2>
+<p>Выберите голос из установленных на вашем телефоне или компьютере. Личные записи на карточках имеют приоритет.</p>
+<div class="voice-settings-controls"><label>Голос<select id="tts-voice"><option value="">Автоматический выбор русского голоса</option></select></label><label>Скорость речи<select id="tts-rate"><option value="0.75">Медленно</option><option value="0.85">Чуть медленнее</option><option value="0.95">Спокойно</option><option value="1">Обычно</option><option value="1.1">Быстрее</option></select></label><button id="tts-test" type="button">▶ Прослушать пример</button></div>
+<p id="tts-notice" class="hint" role="status">Доступные голоса зависят от устройства. Если русский голос отсутствует, проверьте настройки синтеза речи телефона.</p>
+</section>
+<section class="backup-tools adult-only" aria-label="Резервное копирование">
+<h2>Резервная копия</h2>
+<p>Сохраните карточки, фотографии, записи голоса, категории, закрепления и статистику в одном файле. Храните его в безопасном месте.</p>
+<div class="backup-actions"><button id="backup-export" type="button">⬇ Скачать резервную копию</button><button id="backup-import" type="button">⬆ Восстановить из файла</button><input id="backup-file" type="file" accept=".json,application/json" hidden></div>
+<p id="backup-status" role="status" aria-live="polite"></p>
+</section>
+<p class="pin-hint adult-only">↕ В режиме взрослого используйте стрелки ↑ и ↓ на карточках, чтобы задать их порядок. Карточки перемещаются внутри своей группы (закреплённые отдельно), порядок сохраняется автоматически и переносится в резервной копии. При ручной перестановке сортировка по частоте выключается.</p>
+<p class="pin-hint adult-only">📌 Закреплённые карточки всегда показаны первыми во всех категориях. Нажмите значок рядом с карточкой, чтобы закрепить или открепить её.</p>
+<div class="schedule-link"><button type="button" id="schedule-open">🗓️ Моё расписание</button></div>
+<section id="schedule-panel" class="schedule-panel" aria-label="Визуальное расписание Сначала Потом" hidden>
+<div class="schedule-actions"><button type="button" id="view-first">⏳ Сначала → Потом</button><button type="button" id="view-day">🗓️ Расписание дня</button></div>
+<div id="first-then-content"><h2>⏳ Сначала → Потом</h2>
+<p class="schedule-help">Посмотри, что будет сначала, а что потом.</p>
+<div class="schedule-grid"><div class="schedule-step"><h3>1️⃣ СНАЧАЛА</h3><div id="schedule-first" class="schedule-preview"></div></div><div class="schedule-step"><h3>2️⃣ ПОТОМ</h3><div id="schedule-next" class="schedule-preview"></div></div></div>
+<div class="schedule-actions"><button type="button" id="schedule-say">🔊 Произнести по порядку</button><button type="button" id="schedule-back">← К карточкам</button></div>
+<div class="schedule-settings adult-only"><h3>Настроить последовательность</h3><p>Выберите две карточки. Можно выбрать любые слова, включая свои карточки и фотографии.</p><div class="schedule-fields"><label>Сначала<select id="schedule-first-select"></select></label><label>Потом<select id="schedule-next-select"></select></label></div><button id="schedule-reset" type="button">↺ Вернуть пример</button></div>
+</div>
+<div id="day-content" hidden>
+<h2>🗓️ Моё расписание дня</h2>
+<p class="schedule-help">Смотри, что сейчас и что будет дальше. Нажми карточку, чтобы услышать слово.</p>
+<div id="day-progress" class="day-progress" aria-live="polite"></div>
+<div id="day-steps" class="day-steps"></div>
+<div class="schedule-actions"><button id="day-say" type="button">🔊 Озвучить расписание</button><button id="day-back" type="button">← К карточкам</button></div>
+<div class="schedule-settings adult-only"><h3>Настроить день</h3>
+<p>Добавляйте действия из карточек и меняйте их порядок. Выполненные дела можно отметить галочкой.</p>
+<div class="day-add"><select id="day-add-card" aria-label="Выбрать действие"></select><button id="day-add-button" type="button">+ Добавить шаг</button></div>
+<div class="schedule-actions"><button id="day-reset-progress" type="button">↺ Начать день заново</button><button id="day-reset-example" type="button">Вернуть пример</button></div>
+</div></div>
+</section>
+<nav id="categories" class="categories" aria-label="Категории карточек"></nav>
+<section class="phrase-panel" aria-label="Составление фразы">
+<div class="phrase-heading"><strong>Моя фраза</strong><label class="phrase-toggle"><input id="phrase-mode" type="checkbox"> Собирать фразу</label></div>
+<div id="phrase-items" class="phrase-items" aria-live="polite"><span class="phrase-placeholder">Включите сбор фразы и нажмите на карточки</span></div>
+<div class="phrase-actions"><button type="button" id="phrase-say" disabled>🔊 Произнести фразу</button><button type="button" id="phrase-undo" disabled>↶ Убрать последнее</button><button type="button" id="phrase-clear" disabled>Очистить</button></div>
+</section>
+<main id="cards" class="cards" aria-label="Карточки для общения"></main>
+<dialog id="editor" aria-labelledby="dialog-title"><form id="card-form" class="editor">
+<h2 id="dialog-title">Новая карточка</h2>
+<label>Слово или фраза<input id="word" maxlength="45" required placeholder="Например, пить" autocomplete="off"></label>
+<fieldset class="visual-choice"><legend>Изображение карточки</legend>
+<label><input type="radio" name="visual-type" value="emoji" checked> Эмодзи</label>
+<label><input type="radio" name="visual-type" value="icon"> Готовая иконка</label>
+<label><input type="radio" name="visual-type" value="photo"> Своя картинка</label>
+</fieldset>
+<div class="icon-choice" id="icon-choice" hidden><label for="icon-search">Поиск иконки (название)</label><input id="icon-search" type="search" placeholder="Например, вода, парк, школа"><label for="built-in-icon">Выбрать иконку</label><select id="built-in-icon" size="7"><optgroup label="Прежние иконки"><option value="home">Дом (прежний)</option><option value="school">Школа (прежняя)</option><option value="heart">Сердце (прежнее)</option><option value="water">Вода (прежняя)</option><option value="sun">Солнце (прежнее)</option><option value="moon">Сон (прежний)</option><option value="book">Книга (прежняя)</option><option value="play">Игра (прежняя)</option><option value="help">Помощь (прежняя)</option><option value="check">Да (прежнее)</option><option value="close">Нет (прежнее)</option><option value="food">Еда (прежняя)</option><option value="walk">Прогулка (прежняя)</option><option value="star">Звезда (прежняя)</option><option value="clock">Время (прежнее)</option><option value="plus">Ещё (прежнее)</option><option value="smile">Радость (прежняя)</option><option value="gift">Подарок (прежний)</option></optgroup><optgroup label="Общение"><option value="fa-comment">Разговор</option><option value="fa-comments">Общение</option><option value="fa-microphone">Говорить</option><option value="fa-volume-high">Слушать</option><option value="fa-ear-listen">Слышать</option><option value="fa-hand">Стоп</option><option value="fa-hand-holding-heart">Помощь</option><option value="fa-circle-check">Да</option><option value="fa-circle-xmark">Нет</option><option value="fa-circle-question">Вопрос</option><option value="fa-circle-exclamation">Важно</option><option value="fa-plus">Ещё</option><option value="fa-minus">Меньше</option><option value="fa-thumbs-up">Нравится</option><option value="fa-thumbs-down">Не нравится</option></optgroup><optgroup label="Люди и чувства"><option value="fa-user">Я</option><option value="fa-users">Люди</option><option value="fa-person">Человек</option><option value="fa-child">Ребёнок</option><option value="fa-baby">Малыш</option><option value="fa-person-dress">Женщина</option><option value="fa-user-doctor">Врач</option><option value="fa-person-chalkboard">Учитель</option><option value="fa-face-smile">Радость</option><option value="fa-face-sad-tear">Грусть</option><option value="fa-face-angry">Злость</option><option value="fa-face-surprise">Удивление</option><option value="fa-heart">Любовь</option><option value="fa-face-tired">Усталость</option><option value="fa-hands-holding-child">Поддержка</option></optgroup><optgroup label="Еда и напитки"><option value="fa-utensils">Еда</option><option value="fa-glass-water">Пить</option><option value="fa-mug-hot">Чай</option><option value="fa-bottle-water">Бутылка</option><option value="fa-apple-whole">Яблоко</option><option value="fa-carrot">Морковь</option><option value="fa-bread-slice">Хлеб</option><option value="fa-cheese">Сыр</option><option value="fa-egg">Яйцо</option><option value="fa-fish">Рыба</option><option value="fa-cookie">Печенье</option><option value="fa-ice-cream">Мороженое</option><option value="fa-pizza-slice">Пицца</option><option value="fa-burger">Бургер</option><option value="fa-bowl-food">Суп</option><option value="fa-lemon">Лимон</option></optgroup><optgroup label="Места"><option value="fa-house">Дом</option><option value="fa-school">Школа</option><option value="fa-hospital">Больница</option><option value="fa-tree">Парк</option><option value="fa-road">Улица</option><option value="fa-shop">Магазин</option><option value="fa-store">Магазинчик</option><option value="fa-building">Здание</option><option value="fa-bed">Спальня</option><option value="fa-bath">Ванная</option><option value="fa-toilet">Туалет</option><option value="fa-kitchen-set">Кухня</option><option value="fa-door-open">Дверь</option><option value="fa-stairs">Лестница</option><option value="fa-location-dot">Место</option></optgroup><optgroup label="Действия"><option value="fa-person-walking">Гулять</option><option value="fa-person-running">Бежать</option><option value="fa-chair">Сидеть</option><option value="fa-person-swimming">Плавать</option><option value="fa-book-open">Читать</option><option value="fa-pencil">Писать</option><option value="fa-paintbrush">Рисовать</option><option value="fa-hand-holding">Дать</option><option value="fa-lock-open">Открыть</option><option value="fa-lock">Закрыть</option><option value="fa-hand-sparkles">Мыть</option><option value="fa-broom">Убирать</option><option value="fa-person-biking">Кататься</option><option value="fa-music">Петь</option><option value="fa-bed-pulse">Отдыхать</option></optgroup><optgroup label="Игры и занятия"><option value="fa-gamepad">Играть</option><option value="fa-puzzle-piece">Пазл</option><option value="fa-dice">Кубик</option><option value="fa-futbol">Мяч</option><option value="fa-basketball">Баскетбол</option><option value="fa-chess-knight">Шахматы</option><option value="fa-robot">Робот</option><option value="fa-palette">Краски</option><option value="fa-book">Книга</option><option value="fa-pen">Ручка</option><option value="fa-graduation-cap">Учиться</option><option value="fa-tv">Телевизор</option><option value="fa-headphones">Наушники</option><option value="fa-guitar">Гитара</option><option value="fa-camera">Фото</option></optgroup><optgroup label="Предметы и транспорт"><option value="fa-shirt">Одежда</option><option value="fa-socks">Носки</option><option value="fa-shoe-prints">Обувь</option><option value="fa-bag-shopping">Сумка</option><option value="fa-key">Ключ</option><option value="fa-phone">Телефон</option><option value="fa-laptop">Компьютер</option><option value="fa-car">Машина</option><option value="fa-bus">Автобус</option><option value="fa-train">Поезд</option><option value="fa-bicycle">Велосипед</option><option value="fa-plane">Самолёт</option><option value="fa-umbrella">Зонт</option><option value="fa-gift">Подарок</option><option value="fa-lightbulb">Свет</option></optgroup><optgroup label="Время и природа"><option value="fa-clock">Время</option><option value="fa-calendar-days">Календарь</option><option value="fa-sun">Солнце</option><option value="fa-moon">Луна</option><option value="fa-cloud">Облако</option><option value="fa-cloud-rain">Дождь</option><option value="fa-snowflake">Снег</option><option value="fa-star">Звезда</option><option value="fa-arrow-right">Потом</option><option value="fa-flag-checkered">Финиш</option><option value="fa-hourglass-start">Сначала</option><option value="fa-hourglass-end">Затем</option><option value="fa-temperature-half">Температура</option><option value="fa-seedling">Растение</option><option value="fa-paw">Животное</option></optgroup></select><span id="icon-preview" class="icon-preview" aria-hidden="true"></span><p class="hint" id="icon-search-empty" hidden>Ничего не найдено. Попробуйте другое слово.</p></div>
+<label id="emoji-choice">Эмодзи<input id="emoji" maxlength="12" placeholder="💧" value="💬"></label><label id="photo-choice" hidden>Картинка с телефона<input id="photo" type="file" accept="image/*"></label>
+<div class="photo-tools"><img id="photo-preview" alt="Предпросмотр фотографии" hidden><button id="remove-photo" type="button" hidden>Убрать фото</button></div>
+<label>Категория<select id="category"><option value="actions">Действия</option><option value="food">Еда</option><option value="feelings">Чувства</option><option value="games">Игры</option></select></label>
+<label>Индивидуальный цвет (используется в режиме «Индивидуальные цвета»)<select id="color"><option value="#bfe7c6">Зелёный</option><option value="#f3c1c1">Розовый</option><option value="#ffe3a6">Жёлтый</option><option value="#c9d9ff">Голубой</option><option value="#e6c9f4">Сиреневый</option><option value="#bdebe8">Бирюзовый</option></select></label>
+<section class="voice-tools" aria-label="Запись голоса">
+<strong>Мой голос (необязательно)</strong>
+<p class="hint">Запиши произношение карточки. Если записи нет, слово скажет телефон. Для микрофона нужен HTTPS или localhost.</p>
+<div class="voice-buttons"><button id="record" type="button">🎙 Записать голос</button><button id="stop-record" type="button" hidden>■ Остановить</button><button id="listen" type="button" hidden>▶ Прослушать</button><button id="remove-voice" type="button" hidden>Удалить запись</button></div>
+<p id="voice-status" role="status" aria-live="polite"></p>
+</section>
+<div class="actions"><button id="delete" class="danger" type="button" hidden>Удалить</button><button id="cancel" type="button">Отмена</button><button class="primary" type="submit">Сохранить</button></div>
+</form></dialog>
+<dialog id="pin-dialog" aria-labelledby="pin-title">
+<form id="pin-form" class="editor">
+<h2 id="pin-title">Режим взрослого</h2>
+<p id="pin-help" class="hint">Введите PIN-код.</p>
+<label>PIN-код (4–8 цифр)<input id="pin-input" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="off" required></label>
+<label id="pin-confirm-label" hidden>Повторите PIN-код<input id="pin-confirm" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="off"></label>
+<p id="pin-error" role="alert"></p>
+<div class="actions"><button id="pin-cancel" type="button">Отмена</button><button class="primary" type="submit" id="pin-submit">Открыть настройки</button></div>
+</form>
+</dialog>
+<p id="status" class="sr-only" role="status" aria-live="polite"></p>
+<script src="script.js"></script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script></body></html>
